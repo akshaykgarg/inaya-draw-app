@@ -25,6 +25,8 @@ Visit the app: [https://akshaykgarg.github.io/inaya-draw-app](https://akshaykgar
   - Hexagon (⬡)
 - 🎨 Fill options for all shapes
 - 🖼️ Custom fill color picker
+- 🔄 Drag and drop shapes onto canvas
+- ✋ Move shapes after placing them
 
 ### Save & Share
 - 💾 Auto-save last 10 drawings in browser
@@ -47,15 +49,15 @@ Visit the app: [https://akshaykgarg.github.io/inaya-draw-app](https://akshaykgar
 4. Glitter colors will leave sparkling trails
 
 ### Shapes
-1. Click any shape button from the shape toolbar
+1. Drag any shape from the shape toolbar onto the canvas
 2. Select an outline color from the color palette
 3. Choose a fill color (optional)
 4. Check "Use Fill" to enable shape filling
-5. Click and drag on canvas to create the shape
+5. Click and drag existing shapes to move them
 
 ### Saving Your Art
-1. Click "Save Drawing! 💾" to save in browser
-2. Click "Download! 📥" to save to your computer
+1. Click "Save 💾" to save in browser
+2. Click "Download 📥" to save to your computer
 3. View your last 10 drawings below the canvas
 4. Click any saved thumbnail to load it back to canvas
 
@@ -71,6 +73,7 @@ Visit the app: [https://akshaykgarg.github.io/inaya-draw-app](https://akshaykgar
 - Real-time drawing with smooth lines
 - Dynamic sparkle generation
 - Shape rendering with fill options
+- Drag and drop functionality
 - Image data manipulation
 - Local storage management
 
