@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inaya's Cyber Draw APP</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #0a0a1f;
+            font-family: 'Comic Sans MS', cursive;
+            color: #ff71e4;
+            background: linear-gradient(45deg, #0a0a1f 0%, #1a1a3a 100%);
+        }
+        
+        h1 {
+            color: #ff71e4;
+            font-size: 40px;
+            text-shadow: 0 0 10px #ff71e4,
+                         0 0 20px #ff71e4,
+                         0 0 30px #ff71e4;
+            animation: neonPulse 1.5s ease-in-out infinite alternate;
+        }
+
+        @keyframes neonPulse {
+            from {
+                text-shadow: 0 0 10px #ff71e4,
+                            0 0 20px #ff71e4,
+                            0 0 30px #ff71e4;
+            }
+            to {
+                text-shadow: 0 0 20px #ff71e4,
+                            0 0 30px #ff71e4,
+                            0 0 40px #ff71e4,
+                            0 0 50px #ff71e4;
+            }
+        }
+
+        #canvas {
+            border: 5px solid #ff71e4;
+            border-radius: 10px;
+            background-color: #0a0a1f;
+            cursor: crosshair;
+            box-shadow: 0 0 20px #ff71e4,
+                       inset 0 0 20px #ff71e4;
+        }
+
+        .controls {
+            margin: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            align-items: center;
+            background: rgba(255, 113, 228, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: 0 0 10px #ff71e4;
+        }
+
+        .color-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .color-button {
+            width: 50px;
+            height: 50px;
+            border: 3px solid #ff71e4;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 10px rgba(255, 113, 228, 0.5);
+        }
+
+        .color-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #ff71e4;
+        }
+
+        .glitter {
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%),
+                        linear-gradient(45deg, currentColor 25%, transparent 25%, transparent 75%, currentColor 75%);
+            background-size: 4px 4px;
+            background-position: 0 0, 2px 2px;
+        }
+
+        .glitter::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.8) 0%,
+                rgba(255, 255, 255, 0) 20%,
+                rgba(255, 255, 255, 0.8) 40%,
+                rgba(255, 255, 255, 0) 60%,
+                rgba(255, 255, 255, 0.8) 80%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: sparkle 2s linear infinite;
+        }
+
+        @keyframes sparkle {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 20px;
+            border: 3px solid #ff71e4;
+            border-radius: 10px;
+            background-color: transparent;
+            color: #ff71e4;
+            cursor: pointer;
+            font-family: 'Comic Sans MS', cursive;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 5px #ff71e4;
+            box-shadow: 0 0 10px #ff71e4;
+        }
+
+        button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 20px #ff71e4;
+            text-shadow: 0 0 10px #ff71e4;
+            background-color: rgba(255, 113, 228, 0.2);
+        }
+
+        .button-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .saved-drawings {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(255, 113, 228, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 0 10px #ff71e4;
+            max-width: 800px;
+            overflow-x: auto;
+            display: flex;
+            gap: 10px;
+        }
+
+        .saved-drawing {
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .saved-drawing img {
+            width: 100px;
+            height: 62.5px;
+            border: 2px solid #ff71e4;
+            border-radius: 5px;
+            box-shadow: 0 0 5px #ff71e4;
+        }
+
+        .saved-drawing:hover img {
+            transform: scale(1.1);
+            box-shadow: 0 0 15px #ff71e4;
+        }
+
+        .saved-drawing .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff71e4;
+            color: #0a0a1f;
+            border: none;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 14px;
+            line-height: 20px;
+            padding: 0;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .saved-drawing:hover .delete-btn {
+            opacity: 1;
+        }
+
+        .shape-controls {
+            margin-top: 10px;
+            padding: 15px;
+            background: rgba(255, 113, 228, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 0 10px #ff71e4;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .shape-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .shape-button {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #ff71e4;
+            border-radius: 8px;
+            background-color: transparent;
+            color: #ff71e4;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .shape-button:hover, .shape-button.active {
+            background-color: rgba(255, 113, 228, 0.2);
+            transform: scale(1.1);
+            box-shadow: 0 0 10px #ff71e4;
+        }
+
+        .fill-color {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        #fillColorPicker {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            background-color: transparent;
+        }
+
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #ff71e4;
+            font-size: 16px;
+        }
+
+        .cyber-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #ff71e4;
+            background: transparent;
+            appearance: none;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .cyber-checkbox:checked {
+            background: #ff71e4;
+        }
+
+        .cyber-checkbox:checked::after {
+            content: '✓';
+            color: #0a0a1f;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Inaya's Cyber Draw APP</h1>
+    <canvas id="canvas" width="800" height="500"></canvas>
+    <div class="controls">
+        <div class="color-row" id="normalColors">
+            <div class="color-button" style="background-color: #ff6b6b" onclick="setColor('#ff6b6b', false)"></div>
+            <div class="color-button" style="background-color: #4dd637" onclick="setColor('#4dd637', false)"></div>
+            <div class="color-button" style="background-color: #4dabff" onclick="setColor('#4dabff', false)"></div>
+            <div class="color-button" style="background-color: #ffd93d" onclick="setColor('#ffd93d', false)"></div>
+            <div class="color-button" style="background-color: #ff3dd9" onclick="setColor('#ff3dd9', false)"></div>
+            <div class="color-button" style="background-color: #9b4dff" onclick="setColor('#9b4dff', false)"></div>
+            <div class="color-button" style="background-color: #ff8c3d" onclick="setColor('#ff8c3d', false)"></div>
+            <div class="color-button" style="background-color: #3dffa5" onclick="setColor('#3dffa5', false)"></div>
+            <div class="color-button" style="background-color: #000000" onclick="setColor('#000000', false)"></div>
+            <div class="color-button" style="background-color: #ffffff; border: 3px solid #ccc" onclick="setColor('#ffffff', false)"></div>
+        </div>
+        <div class="color-row" id="glitterColors">
+            <div class="color-button glitter" style="color: #ff4d4d" onclick="setColor('#ff4d4d', true)"></div>
+            <div class="color-button glitter" style="color: #4dff4d" onclick="setColor('#4dff4d', true)"></div>
+            <div class="color-button glitter" style="color: #4d4dff" onclick="setColor('#4d4dff', true)"></div>
+            <div class="color-button glitter" style="color: #ffff4d" onclick="setColor('#ffff4d', true)"></div>
+            <div class="color-button glitter" style="color: #ff4dff" onclick="setColor('#ff4dff', true)"></div>
+            <div class="color-button glitter" style="color: #4dffff" onclick="setColor('#4dffff', true)"></div>
+            <div class="color-button glitter" style="color: #ff8533" onclick="setColor('#ff8533', true)"></div>
+            <div class="color-button glitter" style="color: #33ff85" onclick="setColor('#33ff85', true)"></div>
+            <div class="color-button glitter" style="color: #a64dff" onclick="setColor('#a64dff', true)"></div>
+            <div class="color-button glitter" style="color: #ff4d8c" onclick="setColor('#ff4d8c', true)"></div>
+        </div>
+        <div class="shape-controls">
+            <div class="shape-row">
+                <button class="shape-button" onclick="setShape('rect')">□</button>
+                <button class="shape-button" onclick="setShape('circle')">○</button>
+                <button class="shape-button" onclick="setShape('triangle')">△</button>
+                <button class="shape-button" onclick="setShape('star')">★</button>
+                <button class="shape-button" onclick="setShape('heart')">♥</button>
+                <button class="shape-button" onclick="setShape('diamond')">◇</button>
+                <button class="shape-button" onclick="setShape('hexagon')">⬡</button>
+            </div>
+            <div class="shape-row">
+                <div class="fill-color">
+                    <span>Fill Color:</span>
+                    <input type="color" id="fillColorPicker" value="#ff71e4">
+                    <div class="checkbox-wrapper">
+                        <input type="checkbox" id="useFill" class="cyber-checkbox">
+                        <label for="useFill">Use Fill</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="button-row">
+            <button onclick="clearCanvas()">Clear Drawing! ✨</button>
+            <button onclick="saveDrawing()">Save Drawing! 💾</button>
+            <button onclick="downloadDrawing()">Download! 📥</button>
+        </div>
+    </div>
+    <div class="saved-drawings" id="savedDrawings">
+        <!-- Saved drawings will appear here -->
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let isDrawing = false;
+        let isGlitter = false;
+        let sparkles = [];
+        const MAX_SAVED_DRAWINGS = 10;
+        let savedDrawings = JSON.parse(localStorage.getItem('savedDrawings') || '[]');
+        let currentShape = null;
+        let startX, startY;
+        let fillColor = '#ff71e4';
+        let useFill = false;
+
+        ctx.lineWidth = 15;
+        ctx.lineCap = 'round';
+
+        class Sparkle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 4 + 2; // Bigger sparkles
+                this.speedX = (Math.random() - 0.5) * 2;
+                this.speedY = (Math.random() - 0.5) * 2;
+                this.color = color;
+                this.alpha = 1;
+                this.decreaseRate = 0.01; // Slower fade
+                this.angle = Math.random() * Math.PI * 2;
+                this.rotationSpeed = 0.15;
+            }
+
+            update() {
+                this.alpha -= this.decreaseRate;
+                this.angle += this.rotationSpeed;
+                this.x += this.speedX * 0.5;
+                this.y += this.speedY * 0.5;
+                return this.alpha > 0;
+            }
+
+            draw(ctx) {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate(this.angle);
+                
+                // Create neon glow effect
+                ctx.shadowBlur = 15;
+                ctx.shadowColor = this.color;
+                ctx.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                
+                // Draw a star shape
+                ctx.beginPath();
+                for(let i = 0; i < 5; i++) {
+                    ctx.lineTo(Math.cos(i * Math.PI * 0.4) * this.size,
+                             Math.sin(i * Math.PI * 0.4) * this.size);
+                    ctx.lineTo(Math.cos((i * Math.PI * 0.4) + Math.PI * 0.2) * (this.size * 0.4),
+                             Math.sin((i * Math.PI * 0.4) + Math.PI * 0.2) * (this.size * 0.4));
+                }
+                ctx.closePath();
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function addSparkles(x, y, color) {
+            for(let i = 0; i < 3; i++) {
+                sparkles.push(new Sparkle(
+                    x + (Math.random() - 0.5) * 30,
+                    y + (Math.random() - 0.5) * 30,
+                    color
+                ));
+            }
+        }
+
+        function animateSparkles() {
+            ctx.save();
+            sparkles = sparkles.filter(sparkle => {
+                sparkle.draw(ctx);
+                return sparkle.update();
+            });
+            ctx.restore();
+            requestAnimationFrame(animateSparkles);
+        }
+
+        function setColor(color, glitter) {
+            ctx.strokeStyle = color;
+            isGlitter = glitter;
+            if (currentShape) {
+                const buttons = document.querySelectorAll('.shape-button');
+                buttons.forEach(btn => btn.classList.remove('active'));
+                currentShape = null;
+            }
+        }
+
+        function setShape(shape) {
+            currentShape = shape;
+            const buttons = document.querySelectorAll('.shape-button');
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            isGlitter = false;
+        }
+
+        function drawShape(shape, startX, startY, endX, endY) {
+            const width = endX - startX;
+            const height = endY - startY;
+            
+            ctx.beginPath();
+            ctx.strokeStyle = ctx.strokeStyle;
+            
+            switch(shape) {
+                case 'rect':
+                    if (useFill) {
+                        ctx.fillStyle = fillColor;
+                        ctx.fillRect(startX, startY, width, height);
+                    }
+                    ctx.strokeRect(startX, startY, width, height);
+                    break;
+                    
+                case 'circle':
+                    const radius = Math.sqrt(width * width + height * height) / 2;
+                    ctx.arc(startX + width/2, startY + height/2, radius, 0, Math.PI * 2);
+                    if (useFill) {
+                        ctx.fillStyle = fillColor;
+                        ctx.fill();
+                    }
+                    ctx.stroke();
+                    break;
+                    
+                case 'triangle':
+                    ctx.moveTo(startX + width/2, startY);
+                    ctx.lineTo(startX, startY + height);
+                    ctx.lineTo(startX + width, startY + height);
+                    ctx.closePath();
+                    if (useFill) {
+                        ctx.fillStyle = fillColor;
+                        ctx.fill();
+                    }
+                    ctx.stroke();
+                    break;
+                    
+                case 'star':
+                    const spikes = 5;
+                    const outerRadius = Math.min(Math.abs(width), Math.abs(height)) / 2;
+                    const innerRadius = outerRadius / 2;
+                    const centerX = startX + width/2;
+                    const centerY = startY + height/2;
+                    
+                    ctx.moveTo(centerX, centerY - outerRadius);
+                    for (let i = 0; i < spikes * 2; i++) {
+                        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+                        const angle = (i * Math.PI) / spikes;
+                        ctx.lineTo(
+                            centerX + radius * Math.sin(angle),
+                            centerY - radius * Math.cos(angle)
+                        );
+                    }
+                    ctx.closePath();
+                    if (useFill) {
+                        ctx.fillStyle = fillColor;
+                        ctx.fill();
+                    }
+                    ctx.stroke();
+                    break;
+
+                case 'heart':
+                    const heartSize = Math.min(Math.abs(width), Math.abs(height));
+                    drawHeart(startX + width/2, startY + height/2, heartSize/2);
+                    break;
+
+                case 'diamond':
+                    ctx.moveTo(startX + width/2, startY);
+                    ctx.lineTo(startX + width, startY + height/2);
+                    ctx.lineTo(startX + width/2, startY + height);
+                    ctx.lineTo(startX, startY + height/2);
+                    ctx.closePath();
+                    if (useFill) {
+                        ctx.fillStyle = fillColor;
+                        ctx.fill();
+                    }
+                    ctx.stroke();
+                    break;
+
+                case 'hexagon':
+                    const hexSize = Math.min(Math.abs(width), Math.abs(height)) / 2;
+                    drawHexagon(startX + width/2, startY + height/2, hexSize);
+                    break;
+            }
+        }
+
+        function drawHeart(x, y, size) {
+            ctx.beginPath();
+            ctx.moveTo(x, y + size / 4);
+            ctx.bezierCurveTo(x, y, x - size / 2, y, x - size / 2, y + size / 4);
+            ctx.bezierCurveTo(x - size / 2, y + size / 2, x, y + size * 3/4, x, y + size);
+            ctx.bezierCurveTo(x, y + size * 3/4, x + size / 2, y + size / 2, x + size / 2, y + size / 4);
+            ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + size / 4);
+            if (useFill) {
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+            ctx.stroke();
+        }
+
+        function drawHexagon(x, y, size) {
+            ctx.beginPath();
+            for (let i = 0; i < 6; i++) {
+                const angle = (i * Math.PI) / 3;
+                const xPos = x + size * Math.cos(angle);
+                const yPos = y + size * Math.sin(angle);
+                if (i === 0) ctx.moveTo(xPos, yPos);
+                else ctx.lineTo(xPos, yPos);
+            }
+            ctx.closePath();
+            if (useFill) {
+                ctx.fillStyle = fillColor;
+                ctx.fill();
+            }
+            ctx.stroke();
+        }
+
+        function startDrawing(e) {
+            isDrawing = true;
+            if (currentShape) {
+                startX = e.offsetX;
+                startY = e.offsetY;
+            } else {
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+                
+                if (isGlitter) {
+                    addSparkles(e.offsetX, e.offsetY, ctx.strokeStyle);
+                }
+            }
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+            // End the current path
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            
+            if (currentShape) {
+                // Clear the canvas and redraw the shape
+                const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.putImageData(imageData, 0, 0);
+                drawShape(currentShape, startX, startY, e.offsetX, e.offsetY);
+            } else {
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(e.offsetX, e.offsetY);
+
+                if (isGlitter) {
+                    addSparkles(e.offsetX, e.offsetY, ctx.strokeStyle);
+                }
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            sparkles = []; // Clear all sparkles
+        }
+
+        function updateSavedDrawingsDisplay() {
+            const container = document.getElementById('savedDrawings');
+            container.innerHTML = '';
+            
+            savedDrawings.forEach((drawing, index) => {
+                const div = document.createElement('div');
+                div.className = 'saved-drawing';
+                
+                const img = document.createElement('img');
+                img.src = drawing;
+                img.onclick = () => loadDrawing(drawing);
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-btn';
+                deleteBtn.innerHTML = '×';
+                deleteBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    deleteDrawing(index);
+                };
+                
+                div.appendChild(img);
+                div.appendChild(deleteBtn);
+                container.appendChild(div);
+            });
+        }
+
+        function saveDrawing() {
+            const dataUrl = canvas.toDataURL();
+            savedDrawings.unshift(dataUrl);
+            if (savedDrawings.length > MAX_SAVED_DRAWINGS) {
+                savedDrawings.pop();
+            }
+            localStorage.setItem('savedDrawings', JSON.stringify(savedDrawings));
+            updateSavedDrawingsDisplay();
+        }
+
+        function loadDrawing(dataUrl) {
+            const img = new Image();
+            img.onload = () => {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(img, 0, 0);
+            };
+            img.src = dataUrl;
+        }
+
+        function deleteDrawing(index) {
+            savedDrawings.splice(index, 1);
+            localStorage.setItem('savedDrawings', JSON.stringify(savedDrawings));
+            updateSavedDrawingsDisplay();
+        }
+
+        function downloadDrawing() {
+            const link = document.createElement('a');
+            link.download = 'my-cyber-drawing.png';
+            link.href = canvas.toDataURL();
+            link.click();
+        }
+
+        // Initialize saved drawings display
+        updateSavedDrawingsDisplay();
+
+        // Set initial color
+        setColor('#ff6b6b', false);
+
+        // Start the sparkle animation
+        animateSparkles();
+
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Add event listeners for new controls
+        document.getElementById('fillColorPicker').addEventListener('input', (e) => {
+            fillColor = e.target.value;
+        });
+
+        document.getElementById('useFill').addEventListener('change', (e) => {
+            useFill = e.target.checked;
+        });
+    </script>
+</body>
+</html> 
