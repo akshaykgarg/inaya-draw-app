@@ -213,18 +213,29 @@
             border-radius: 8px;
             background-color: transparent;
             color: #ff71e4;
-            cursor: pointer;
+            cursor: grab;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             transition: all 0.3s ease;
+            user-select: none;
         }
 
-        .shape-button:hover, .shape-button.active {
-            background-color: rgba(255, 113, 228, 0.2);
-            transform: scale(1.1);
-            box-shadow: 0 0 10px #ff71e4;
+        .shape-button:active {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .shape-preview {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.7;
         }
 
         .fill-color {
@@ -307,13 +318,13 @@
         </div>
         <div class="shape-controls">
             <div class="shape-row">
-                <button class="shape-button" onclick="setShape('rect')">□</button>
-                <button class="shape-button" onclick="setShape('circle')">○</button>
-                <button class="shape-button" onclick="setShape('triangle')">△</button>
-                <button class="shape-button" onclick="setShape('star')">★</button>
-                <button class="shape-button" onclick="setShape('heart')">♥</button>
-                <button class="shape-button" onclick="setShape('diamond')">◇</button>
-                <button class="shape-button" onclick="setShape('hexagon')">⬡</button>
+                <div class="shape-button" draggable="true" data-shape="rect">□</div>
+                <div class="shape-button" draggable="true" data-shape="circle">○</div>
+                <div class="shape-button" draggable="true" data-shape="triangle">△</div>
+                <div class="shape-button" draggable="true" data-shape="star">★</div>
+                <div class="shape-button" draggable="true" data-shape="heart">♥</div>
+                <div class="shape-button" draggable="true" data-shape="diamond">◇</div>
+                <div class="shape-button" draggable="true" data-shape="hexagon">⬡</div>
             </div>
             <div class="shape-row">
                 <div class="fill-color">
@@ -348,6 +359,11 @@
         let startX, startY;
         let fillColor = '#ff71e4';
         let useFill = false;
+        let shapes = [];
+        let selectedShape = null;
+        let isDragging = false;
+        let dragStartX, dragStartY;
+        let dragOffsetX, dragOffsetY;
 
         ctx.lineWidth = 15;
         ctx.lineCap = 'round';
@@ -603,6 +619,7 @@
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             sparkles = []; // Clear all sparkles
+            shapes = [];
         }
 
         function updateSavedDrawingsDisplay() {
@@ -632,6 +649,8 @@
         }
 
         function saveDrawing() {
+            // Draw all shapes before saving
+            redrawCanvas();
             const dataUrl = canvas.toDataURL();
             savedDrawings.unshift(dataUrl);
             if (savedDrawings.length > MAX_SAVED_DRAWINGS) {
@@ -663,6 +682,15 @@
             link.click();
         }
 
+        function redrawCanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Redraw all shapes
+            shapes.forEach(shape => shape.draw(ctx));
+        }
+
         // Initialize saved drawings display
         updateSavedDrawingsDisplay();
 
@@ -672,10 +700,104 @@
         // Start the sparkle animation
         animateSparkles();
 
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            // Check if clicking on an existing shape
+            selectedShape = shapes.find(shape => shape.isPointInside(x, y));
+
+            if (selectedShape) {
+                isDragging = true;
+                dragStartX = x;
+                dragStartY = y;
+                dragOffsetX = x - selectedShape.x;
+                dragOffsetY = y - selectedShape.y;
+            } else {
+                // Regular drawing behavior
+                isDrawing = true;
+                if (!currentShape) {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    if (isGlitter) {
+                        addSparkles(x, y, ctx.strokeStyle);
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+
+            if (isDragging && selectedShape) {
+                const dx = x - dragStartX;
+                const dy = y - dragStartY;
+                selectedShape.move(dx, dy);
+                dragStartX = x;
+                dragStartY = y;
+                redrawCanvas();
+            } else if (isDrawing) {
+                // Regular drawing behavior
+                if (!currentShape) {
+                    ctx.lineTo(x, y);
+                    ctx.stroke();
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    if (isGlitter) {
+                        addSparkles(x, y, ctx.strokeStyle);
+                    }
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+            isDragging = false;
+            selectedShape = null;
+            ctx.beginPath();
+        });
+
+        // Add drag and drop event listeners for shape buttons
+        document.querySelectorAll('.shape-button').forEach(button => {
+            button.addEventListener('dragstart', (e) => {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.dataset.shape);
+            });
+
+            button.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            const shapeType = e.dataTransfer.getData('text/plain');
+
+            // Create new shape at drop position
+            const newShape = new Shape(
+                shapeType,
+                x - 25, // Center shape at drop position
+                y - 25,
+                50, // Default size
+                50,
+                ctx.strokeStyle,
+                fillColor,
+                useFill
+            );
+            
+            shapes.push(newShape);
+            redrawCanvas();
+        });
 
         // Add event listeners for new controls
         document.getElementById('fillColorPicker').addEventListener('input', (e) => {
