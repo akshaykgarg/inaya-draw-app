@@ -6,14 +6,27 @@
         body {
             display: flex;
             flex-direction: column;
-            align-items: center;
             background-color: #0a0a1f;
             font-family: 'Comic Sans MS', cursive;
             color: #ff71e4;
             background: linear-gradient(45deg, #0a0a1f 0%, #1a1a3a 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
         }
-        
+
+        .main-container {
+            display: flex;
+            gap: 20px;
+            width: 100%;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
         h1 {
+            text-align: center;
+            margin-bottom: 20px;
             color: #ff71e4;
             font-size: 40px;
             text-shadow: 0 0 10px #ff71e4,
@@ -37,34 +50,38 @@
         }
 
         #canvas {
-            border: 5px solid #ff71e4;
+            border: 3px solid #ff71e4;
             border-radius: 10px;
             background-color: #0a0a1f;
             cursor: crosshair;
             box-shadow: 0 0 20px #ff71e4,
                        inset 0 0 20px #ff71e4;
+            width: 80vw;
+            height: 80vh;
         }
 
         .controls {
-            margin: 20px;
+            width: 250px;
             display: flex;
             flex-direction: column;
             gap: 15px;
-            align-items: center;
             background: rgba(255, 113, 228, 0.1);
             padding: 20px;
             border-radius: 15px;
             box-shadow: 0 0 10px #ff71e4;
+            position: sticky;
+            top: 20px;
         }
 
         .color-row {
-            display: flex;
-            gap: 10px;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
         }
 
         .color-button {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             border: 3px solid #ff71e4;
             border-radius: 10px;
             cursor: pointer;
@@ -110,9 +127,17 @@
             100% { transform: translateX(100%); }
         }
 
+        .button-row {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 100%;
+        }
+
         button {
-            padding: 10px 20px;
-            font-size: 20px;
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
             border: 3px solid #ff71e4;
             border-radius: 10px;
             background-color: transparent;
@@ -122,6 +147,8 @@
             transition: all 0.3s ease;
             text-shadow: 0 0 5px #ff71e4;
             box-shadow: 0 0 10px #ff71e4;
+            white-space: nowrap;
+            text-align: center;
         }
 
         button:hover {
@@ -131,32 +158,31 @@
             background-color: rgba(255, 113, 228, 0.2);
         }
 
-        .button-row {
-            display: flex;
-            gap: 10px;
-        }
-
         .saved-drawings {
+            width: 250px;
             margin-top: 20px;
             padding: 15px;
             background: rgba(255, 113, 228, 0.1);
             border-radius: 15px;
             box-shadow: 0 0 10px #ff71e4;
-            max-width: 800px;
-            overflow-x: auto;
             display: flex;
+            flex-direction: column;
             gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
         }
 
         .saved-drawing {
+            width: 100%;
             position: relative;
             cursor: pointer;
             transition: all 0.3s ease;
         }
 
         .saved-drawing img {
-            width: 100px;
-            height: 62.5px;
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16/9;
             border: 2px solid #ff71e4;
             border-radius: 5px;
             box-shadow: 0 0 5px #ff71e4;
@@ -207,24 +233,35 @@
         }
 
         .shape-button {
-            width: 40px;
-            height: 40px;
+            width: 60px;
+            height: 60px;
             border: 2px solid #ff71e4;
             border-radius: 8px;
             background-color: transparent;
             color: #ff71e4;
-            cursor: pointer;
+            cursor: grab;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
             transition: all 0.3s ease;
+            user-select: none;
         }
 
-        .shape-button:hover, .shape-button.active {
-            background-color: rgba(255, 113, 228, 0.2);
-            transform: scale(1.1);
-            box-shadow: 0 0 10px #ff71e4;
+        .shape-button:active {
+            cursor: grabbing;
+        }
+
+        .dragging {
+            opacity: 0.5;
+            cursor: grabbing;
+        }
+
+        .shape-preview {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1000;
+            opacity: 0.7;
         }
 
         .fill-color {
@@ -279,66 +316,138 @@
 </head>
 <body>
     <h1>Inaya's Cyber Draw APP</h1>
-    <canvas id="canvas" width="800" height="500"></canvas>
-    <div class="controls">
-        <div class="color-row" id="normalColors">
-            <div class="color-button" style="background-color: #ff6b6b" onclick="setColor('#ff6b6b', false)"></div>
-            <div class="color-button" style="background-color: #4dd637" onclick="setColor('#4dd637', false)"></div>
-            <div class="color-button" style="background-color: #4dabff" onclick="setColor('#4dabff', false)"></div>
-            <div class="color-button" style="background-color: #ffd93d" onclick="setColor('#ffd93d', false)"></div>
-            <div class="color-button" style="background-color: #ff3dd9" onclick="setColor('#ff3dd9', false)"></div>
-            <div class="color-button" style="background-color: #9b4dff" onclick="setColor('#9b4dff', false)"></div>
-            <div class="color-button" style="background-color: #ff8c3d" onclick="setColor('#ff8c3d', false)"></div>
-            <div class="color-button" style="background-color: #3dffa5" onclick="setColor('#3dffa5', false)"></div>
-            <div class="color-button" style="background-color: #000000" onclick="setColor('#000000', false)"></div>
-            <div class="color-button" style="background-color: #ffffff; border: 3px solid #ccc" onclick="setColor('#ffffff', false)"></div>
-        </div>
-        <div class="color-row" id="glitterColors">
-            <div class="color-button glitter" style="color: #ff4d4d" onclick="setColor('#ff4d4d', true)"></div>
-            <div class="color-button glitter" style="color: #4dff4d" onclick="setColor('#4dff4d', true)"></div>
-            <div class="color-button glitter" style="color: #4d4dff" onclick="setColor('#4d4dff', true)"></div>
-            <div class="color-button glitter" style="color: #ffff4d" onclick="setColor('#ffff4d', true)"></div>
-            <div class="color-button glitter" style="color: #ff4dff" onclick="setColor('#ff4dff', true)"></div>
-            <div class="color-button glitter" style="color: #4dffff" onclick="setColor('#4dffff', true)"></div>
-            <div class="color-button glitter" style="color: #ff8533" onclick="setColor('#ff8533', true)"></div>
-            <div class="color-button glitter" style="color: #33ff85" onclick="setColor('#33ff85', true)"></div>
-            <div class="color-button glitter" style="color: #a64dff" onclick="setColor('#a64dff', true)"></div>
-            <div class="color-button glitter" style="color: #ff4d8c" onclick="setColor('#ff4d8c', true)"></div>
-        </div>
-        <div class="shape-controls">
-            <div class="shape-row">
-                <button class="shape-button" onclick="setShape('rect')">□</button>
-                <button class="shape-button" onclick="setShape('circle')">○</button>
-                <button class="shape-button" onclick="setShape('triangle')">△</button>
-                <button class="shape-button" onclick="setShape('star')">★</button>
-                <button class="shape-button" onclick="setShape('heart')">♥</button>
-                <button class="shape-button" onclick="setShape('diamond')">◇</button>
-                <button class="shape-button" onclick="setShape('hexagon')">⬡</button>
+    <div class="main-container">
+        <div class="controls">
+            <div class="color-row" id="normalColors">
+                <div class="color-button" style="background-color: #ff6b6b" onclick="setColor('#ff6b6b', false)"></div>
+                <div class="color-button" style="background-color: #4dd637" onclick="setColor('#4dd637', false)"></div>
+                <div class="color-button" style="background-color: #4dabff" onclick="setColor('#4dabff', false)"></div>
+                <div class="color-button" style="background-color: #ffd93d" onclick="setColor('#ffd93d', false)"></div>
+                <div class="color-button" style="background-color: #ff3dd9" onclick="setColor('#ff3dd9', false)"></div>
+                <div class="color-button" style="background-color: #9b4dff" onclick="setColor('#9b4dff', false)"></div>
+                <div class="color-button" style="background-color: #ff8c3d" onclick="setColor('#ff8c3d', false)"></div>
+                <div class="color-button" style="background-color: #3dffa5" onclick="setColor('#3dffa5', false)"></div>
+                <div class="color-button" style="background-color: #000000" onclick="setColor('#000000', false)"></div>
+                <div class="color-button" style="background-color: #ffffff; border: 3px solid #ccc" onclick="setColor('#ffffff', false)"></div>
             </div>
-            <div class="shape-row">
-                <div class="fill-color">
-                    <span>Fill Color:</span>
-                    <input type="color" id="fillColorPicker" value="#ff71e4">
-                    <div class="checkbox-wrapper">
-                        <input type="checkbox" id="useFill" class="cyber-checkbox">
-                        <label for="useFill">Use Fill</label>
+            <div class="color-row" id="glitterColors">
+                <div class="color-button glitter" style="color: #ff4d4d" onclick="setColor('#ff4d4d', true)"></div>
+                <div class="color-button glitter" style="color: #4dff4d" onclick="setColor('#4dff4d', true)"></div>
+                <div class="color-button glitter" style="color: #4d4dff" onclick="setColor('#4d4dff', true)"></div>
+                <div class="color-button glitter" style="color: #ffff4d" onclick="setColor('#ffff4d', true)"></div>
+                <div class="color-button glitter" style="color: #ff4dff" onclick="setColor('#ff4dff', true)"></div>
+                <div class="color-button glitter" style="color: #4dffff" onclick="setColor('#4dffff', true)"></div>
+                <div class="color-button glitter" style="color: #ff8533" onclick="setColor('#ff8533', true)"></div>
+                <div class="color-button glitter" style="color: #33ff85" onclick="setColor('#33ff85', true)"></div>
+                <div class="color-button glitter" style="color: #a64dff" onclick="setColor('#a64dff', true)"></div>
+                <div class="color-button glitter" style="color: #ff4d8c" onclick="setColor('#ff4d8c', true)"></div>
+            </div>
+            <div class="shape-controls">
+                <div class="shape-row">
+                    <div class="shape-button" draggable="true" data-shape="rect">□</div>
+                    <div class="shape-button" draggable="true" data-shape="circle">○</div>
+                    <div class="shape-button" draggable="true" data-shape="triangle">△</div>
+                    <div class="shape-button" draggable="true" data-shape="star">★</div>
+                </div>
+                <div class="shape-row">
+                    <div class="shape-button" draggable="true" data-shape="heart">♥</div>
+                    <div class="shape-button" draggable="true" data-shape="diamond">◇</div>
+                    <div class="shape-button" draggable="true" data-shape="hexagon">⬡</div>
+                </div>
+                <div class="shape-row">
+                    <div class="fill-color">
+                        <span>Fill Color:</span>
+                        <input type="color" id="fillColorPicker" value="#ff71e4">
+                        <div class="checkbox-wrapper">
+                            <input type="checkbox" id="useFill" class="cyber-checkbox">
+                            <label for="useFill">Use Fill</label>
+                        </div>
                     </div>
                 </div>
             </div>
+            <div class="button-row">
+                <button onclick="clearCanvas()">Clear ✨</button>
+                <button onclick="saveDrawing()">Save 💾</button>
+                <button onclick="downloadDrawing()">Download 📥</button>
+            </div>
+            <div class="saved-drawings" id="savedDrawings">
+                <!-- Saved drawings will appear here -->
+            </div>
         </div>
-        <div class="button-row">
-            <button onclick="clearCanvas()">Clear Drawing! ✨</button>
-            <button onclick="saveDrawing()">Save Drawing! 💾</button>
-            <button onclick="downloadDrawing()">Download! 📥</button>
-        </div>
-    </div>
-    <div class="saved-drawings" id="savedDrawings">
-        <!-- Saved drawings will appear here -->
+        <canvas id="canvas" width="1600" height="900"></canvas>
     </div>
 
     <script>
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+
+        // Fix canvas scaling
+        function resizeCanvas() {
+            const displayWidth = canvas.clientWidth;
+            const displayHeight = canvas.clientHeight;
+            
+            if (canvas.width !== displayWidth || canvas.height !== displayHeight) {
+                canvas.width = displayWidth;
+                canvas.height = displayHeight;
+            }
+        }
+
+        // Call resize initially and on window resize
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
+        // Helper function to get correct mouse coordinates
+        function getMousePos(canvas, evt) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            
+            return {
+                x: (evt.clientX - rect.left) * scaleX,
+                y: (evt.clientY - rect.top) * scaleY
+            };
+        }
+
+        class Shape {
+            constructor(type, x, y, width, height, strokeColor, fillColor, useFill) {
+                this.type = type;
+                this.x = x;
+                this.y = y;
+                this.width = width;
+                this.height = height;
+                this.strokeColor = strokeColor;
+                this.fillColor = fillColor;
+                this.useFill = useFill;
+            }
+
+            draw(ctx) {
+                const oldStrokeStyle = ctx.strokeStyle;
+                ctx.strokeStyle = this.strokeColor;
+                
+                if (this.useFill) {
+                    ctx.fillStyle = this.fillColor;
+                }
+                
+                drawShape(this.type, this.x, this.y, this.x + this.width, this.y + this.height);
+                
+                ctx.strokeStyle = oldStrokeStyle;
+            }
+
+            move(dx, dy) {
+                this.x += dx;
+                this.y += dy;
+            }
+
+            isPointInside(x, y) {
+                // Add padding for easier selection
+                const padding = 10;
+                return x >= this.x - padding && 
+                       x <= this.x + this.width + padding &&
+                       y >= this.y - padding && 
+                       y <= this.y + this.height + padding;
+            }
+        }
+
         let isDrawing = false;
         let isGlitter = false;
         let sparkles = [];
@@ -348,6 +457,11 @@
         let startX, startY;
         let fillColor = '#ff71e4';
         let useFill = false;
+        let shapes = [];
+        let selectedShape = null;
+        let isDragging = false;
+        let dragStartX, dragStartY;
+        let dragOffsetX, dragOffsetY;
 
         ctx.lineWidth = 15;
         ctx.lineCap = 'round';
@@ -441,12 +555,10 @@
             const height = endY - startY;
             
             ctx.beginPath();
-            ctx.strokeStyle = ctx.strokeStyle;
             
             switch(shape) {
                 case 'rect':
                     if (useFill) {
-                        ctx.fillStyle = fillColor;
                         ctx.fillRect(startX, startY, width, height);
                     }
                     ctx.strokeRect(startX, startY, width, height);
@@ -456,7 +568,6 @@
                     const radius = Math.sqrt(width * width + height * height) / 2;
                     ctx.arc(startX + width/2, startY + height/2, radius, 0, Math.PI * 2);
                     if (useFill) {
-                        ctx.fillStyle = fillColor;
                         ctx.fill();
                     }
                     ctx.stroke();
@@ -468,7 +579,6 @@
                     ctx.lineTo(startX + width, startY + height);
                     ctx.closePath();
                     if (useFill) {
-                        ctx.fillStyle = fillColor;
                         ctx.fill();
                     }
                     ctx.stroke();
@@ -492,7 +602,6 @@
                     }
                     ctx.closePath();
                     if (useFill) {
-                        ctx.fillStyle = fillColor;
                         ctx.fill();
                     }
                     ctx.stroke();
@@ -510,7 +619,6 @@
                     ctx.lineTo(startX, startY + height/2);
                     ctx.closePath();
                     if (useFill) {
-                        ctx.fillStyle = fillColor;
                         ctx.fill();
                     }
                     ctx.stroke();
@@ -531,7 +639,6 @@
             ctx.bezierCurveTo(x, y + size * 3/4, x + size / 2, y + size / 2, x + size / 2, y + size / 4);
             ctx.bezierCurveTo(x + size / 2, y, x, y, x, y + size / 4);
             if (useFill) {
-                ctx.fillStyle = fillColor;
                 ctx.fill();
             }
             ctx.stroke();
@@ -548,7 +655,6 @@
             }
             ctx.closePath();
             if (useFill) {
-                ctx.fillStyle = fillColor;
                 ctx.fill();
             }
             ctx.stroke();
@@ -603,6 +709,7 @@
         function clearCanvas() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             sparkles = []; // Clear all sparkles
+            shapes = [];
         }
 
         function updateSavedDrawingsDisplay() {
@@ -632,6 +739,8 @@
         }
 
         function saveDrawing() {
+            // Draw all shapes before saving
+            redrawCanvas();
             const dataUrl = canvas.toDataURL();
             savedDrawings.unshift(dataUrl);
             if (savedDrawings.length > MAX_SAVED_DRAWINGS) {
@@ -658,9 +767,19 @@
 
         function downloadDrawing() {
             const link = document.createElement('a');
-            link.download = 'my-cyber-drawing.png';
+            const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+            link.download = `inaya/cyber-drawing-${timestamp}.png`;
             link.href = canvas.toDataURL();
             link.click();
+        }
+
+        function redrawCanvas() {
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.putImageData(imageData, 0, 0);
+            
+            // Redraw all shapes
+            shapes.forEach(shape => shape.draw(ctx));
         }
 
         // Initialize saved drawings display
@@ -672,10 +791,98 @@
         // Start the sparkle animation
         animateSparkles();
 
-        canvas.addEventListener('mousedown', startDrawing);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDrawing);
-        canvas.addEventListener('mouseout', stopDrawing);
+        canvas.addEventListener('mousedown', (e) => {
+            const pos = getMousePos(canvas, e);
+            
+            // Check if clicking on an existing shape
+            selectedShape = shapes.find(shape => shape.isPointInside(pos.x, pos.y));
+
+            if (selectedShape) {
+                isDragging = true;
+                dragStartX = pos.x;
+                dragStartY = pos.y;
+            } else {
+                // Regular drawing behavior
+                isDrawing = true;
+                startX = pos.x;
+                startY = pos.y;
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                
+                if (isGlitter) {
+                    addSparkles(pos.x, pos.y, ctx.strokeStyle);
+                }
+            }
+        });
+
+        canvas.addEventListener('mousemove', (e) => {
+            const pos = getMousePos(canvas, e);
+
+            if (isDragging && selectedShape) {
+                const dx = pos.x - dragStartX;
+                const dy = pos.y - dragStartY;
+                selectedShape.move(dx, dy);
+                dragStartX = pos.x;
+                dragStartY = pos.y;
+                redrawCanvas();
+            } else if (isDrawing) {
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(pos.x, pos.y);
+
+                if (isGlitter) {
+                    addSparkles(pos.x, pos.y, ctx.strokeStyle);
+                }
+            }
+        });
+
+        canvas.addEventListener('mouseup', () => {
+            isDrawing = false;
+            isDragging = false;
+            selectedShape = null;
+            ctx.beginPath();
+        });
+
+        // Add drag and drop event listeners for shape buttons
+        document.querySelectorAll('.shape-button').forEach(button => {
+            button.addEventListener('dragstart', (e) => {
+                e.target.classList.add('dragging');
+                e.dataTransfer.setData('text/plain', e.target.dataset.shape);
+            });
+
+            button.addEventListener('dragend', (e) => {
+                e.target.classList.remove('dragging');
+            });
+        });
+
+        canvas.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            e.dataTransfer.dropEffect = 'copy';
+        });
+
+        canvas.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const pos = getMousePos(canvas, e);
+            const shapeType = e.dataTransfer.getData('text/plain');
+
+            // Create new shape at drop position
+            const newShape = new Shape(
+                shapeType,
+                pos.x - 50, // Center shape at drop position
+                pos.y - 50,
+                100, // Larger default size
+                100,
+                ctx.strokeStyle,
+                fillColor,
+                useFill
+            );
+            
+            shapes.push(newShape);
+            redrawCanvas();
+        });
 
         // Add event listeners for new controls
         document.getElementById('fillColorPicker').addEventListener('input', (e) => {
